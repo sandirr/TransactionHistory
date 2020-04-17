@@ -89,6 +89,27 @@ class HistoryScreen extends React.Component {
     return newAmountFormat;
   };
 
+  generateDate = date => {
+    const [y, m, d] = date.split('-');
+    console.log(y, m, d);
+    const month = [
+      'Januari',
+      'Februari',
+      'Maret',
+      'April',
+      'Mei',
+      'Juni',
+      'Juli',
+      'Agustus',
+      'September',
+      'Oktober',
+      'November',
+      'Desember',
+    ];
+    const generatedDate = `${d} ${month[parseInt(m) - 1]} ${y}`;
+    return generatedDate;
+  };
+
   renderRow = ({item}) => {
     return (
       <View
@@ -143,7 +164,10 @@ class HistoryScreen extends React.Component {
                 Rp{this.generateAmount(item.amount)}{' '}
               </Text>
               <Icon name="lens" style={{fontSize: 7}} />
-              <Text style={styles.date}> {item.created_at}</Text>
+              <Text style={styles.date}>
+                {' '}
+                {this.generateDate(item.created_at.substr(0, 10))}
+              </Text>
             </View>
           </View>
           <View
