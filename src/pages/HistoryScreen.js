@@ -23,6 +23,7 @@ class HistoryScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      notFilteredData: [],
       data: [],
       search: '',
       modalShown: false,
@@ -34,19 +35,22 @@ class HistoryScreen extends React.Component {
   }
 
   componentDidUpdate() {
-    if (this.state.data.length < 1) {
+    if (this.state.notFilteredData.length < 1) {
       let data = [];
       Object.keys(this.props.histories.history).forEach(e => {
         let newData = this.props.histories.history[e];
         data.push(newData);
-        this.setState({data});
+        this.setState({
+          notFilteredData: data,
+          data,
+        });
       });
     }
   }
 
   refreshData = () => {
-    this.setState({isFetching: true});
-    this.props.dispatch(getHistory());
+    this.setState({isFetching: true, notFilteredData: []});
+    this.getHistory();
     this.setState({isFetching: false});
   };
 
@@ -78,7 +82,6 @@ class HistoryScreen extends React.Component {
 
   generateDate = date => {
     const [y, m, d] = date.split('-');
-    console.log(y, m, d);
     const month = [
       'Januari',
       'Februari',
@@ -97,49 +100,73 @@ class HistoryScreen extends React.Component {
     return generatedDate;
   };
 
+  searchHistory = text => {
+    let newData = this.state.notFilteredData.filter(preData => {
+      let name = preData.beneficiary_name
+        .toLowerCase()
+        .match(text.toLowerCase());
+      let beneficiary_bank = preData.beneficiary_bank
+        .toLowerCase()
+        .match(text.toLowerCase());
+      let sender_bank = preData.sender_bank
+        .toLowerCase()
+        .match(text.toLowerCase());
+      let amount = preData.amount
+        .toString()
+        .toLowerCase()
+        .match(text.toLowerCase());
+      return name + amount + beneficiary_bank + sender_bank;
+    });
+    if (text !== '') {
+      this.setState({data: newData});
+    } else {
+      this.setState({data: this.state.notFilteredData});
+    }
+  };
+
   renderRow = ({item}) => {
     return (
-      <View style={styles.card}>
+      <View style={Styles.card}>
         <View
           style={
             item.status === 'SUCCESS'
-              ? styles.successIndicator
-              : styles.pendingIndicator
+              ? Styles.successIndicator
+              : Styles.pendingIndicator
           }
         />
-        <View style={styles.cardContent}>
+        <View style={Styles.cardContent}>
           <View>
-            <View style={styles.transfer}>
-              <Text style={styles.bankText}>
+            <View style={Styles.transfer}>
+              <Text style={Styles.bankText}>
                 {this.capitalizecheck(item.sender_bank)}{' '}
               </Text>
-              <Icon name="arrow-forward" style={styles.bankText} />
-              <Text style={styles.bankText}>
+              <Icon name="arrow-forward" style={Styles.bankText} />
+              <Text style={Styles.bankText}>
                 {' '}
                 {this.capitalizecheck(item.beneficiary_bank)}
               </Text>
             </View>
-            <Text style={styles.beneficiery}>
+            <Text style={Styles.beneficiery}>
               {item.beneficiary_name.toUpperCase()}
             </Text>
-            <View style={styles.transfer}>
-              <Text style={styles.amount}>
+            <View style={Styles.transfer}>
+              <Text style={Styles.amount}>
                 Rp{this.generateAmount(item.amount)}{' '}
               </Text>
-              <Icon name="lens" style={styles.dot} />
-              <Text style={styles.date}>
+              <Icon name="lens" style={Styles.dot} />
+              <Text style={Styles.date}>
                 {' '}
                 {this.generateDate(item.created_at.substr(0, 10))}
               </Text>
             </View>
           </View>
           <View
-            style={item.status === 'SUCCESS' ? styles.success : styles.pending}>
+            style={item.status === 'SUCCESS' ? Styles.success : Styles.pending}>
             <Text
               style={
                 item.status === 'SUCCESS'
-                  ? styles.successText
-                  : styles.pendingText
+                  ? Styles.successText
+                  : Styles.pendingText
               }>
               {item.status === 'SUCCESS' ? 'Berhasil' : 'Pengecekan'}
             </Text>
@@ -152,6 +179,7 @@ class HistoryScreen extends React.Component {
   render() {
     const {noLoading} = this.props.histories;
     console.log(this.state.data);
+    console.log('notfiltered', this.state.notFilteredData);
     return (
       <>
         <StatusBar
@@ -160,14 +188,15 @@ class HistoryScreen extends React.Component {
             this.state.modalShown ? 'rgba(rgba(0,0,0,.5))' : '#edf4f0'
           }
         />
-        <View style={styles.contentContainer}>
+        <View style={Styles.contentContainer}>
           {/* search */}
-          <View style={styles.search}>
-            <Item style={styles.searchItem}>
-              <Icon name="search" style={styles.searchIcon} />
+          <View style={Styles.search}>
+            <Item style={Styles.searchItem}>
+              <Icon name="search" style={Styles.searchIcon} />
               <Input
                 placeholder="Cari nama, bank, atau nominal"
-                style={styles.searchInput}
+                style={Styles.searchInput}
+                onChangeText={text => this.searchHistory(text)}
               />
               <TouchableOpacity
                 onPress={() =>
@@ -175,11 +204,11 @@ class HistoryScreen extends React.Component {
                     modalShown: true,
                   })
                 }>
-                <View style={styles.sort}>
-                  <Text style={styles.sortText}>URUTKAN</Text>
+                <View style={Styles.sort}>
+                  <Text style={Styles.sortText}>URUTKAN</Text>
                   <Image
                     source={require('../icons/keyboard_arrow_down.png')}
-                    style={styles.sortIcon}
+                    style={Styles.sortIcon}
                   />
                 </View>
               </TouchableOpacity>
@@ -195,58 +224,58 @@ class HistoryScreen extends React.Component {
             // }}
           >
             <TouchableOpacity
-              style={styles.full}
+              style={Styles.full}
               onPress={() => this.setState({modalShown: false})}>
-              <View style={styles.modalOverlay}>
-                <View style={styles.modalContent}>
-                  <ListItem style={styles.listItem}>
+              <View style={Styles.modalOverlay}>
+                <View style={Styles.modalContent}>
+                  <ListItem style={Styles.listItem}>
                     <Left>
                       <Radio
                         selected={false}
                         color="#ff6246"
                         selectedColor={'#ff6246'}
                       />
-                      <Text style={styles.listItemText}>URUTKAN</Text>
+                      <Text style={Styles.listItemText}>URUTKAN</Text>
                     </Left>
                   </ListItem>
-                  <ListItem style={styles.listItem}>
+                  <ListItem style={Styles.listItem}>
                     <Left>
                       <Radio
                         selected={false}
                         color="#ff6246"
                         selectedColor={'#ff6246'}
                       />
-                      <Text style={styles.listItemText}>Nama A-Z</Text>
+                      <Text style={Styles.listItemText}>Nama A-Z</Text>
                     </Left>
                   </ListItem>
-                  <ListItem style={styles.listItem}>
+                  <ListItem style={Styles.listItem}>
                     <Left>
                       <Radio
                         selected={true}
                         color="#ff6246"
                         selectedColor={'#ff6246'}
                       />
-                      <Text style={styles.listItemText}>Nama Z-A</Text>
+                      <Text style={Styles.listItemText}>Nama Z-A</Text>
                     </Left>
                   </ListItem>
-                  <ListItem style={styles.listItem}>
+                  <ListItem style={Styles.listItem}>
                     <Left>
                       <Radio
                         selected={false}
                         color="#ff6246"
                         selectedColor={'#ff6246'}
                       />
-                      <Text style={styles.listItemText}>Tanggal Terbaru</Text>
+                      <Text style={Styles.listItemText}>Tanggal Terbaru</Text>
                     </Left>
                   </ListItem>
-                  <ListItem style={styles.listItem}>
+                  <ListItem style={Styles.listItem}>
                     <Left>
                       <Radio
                         selected={false}
                         color="#ff6246"
                         selectedColor={'#ff6246'}
                       />
-                      <Text style={styles.listItemText}>Tanggal Terlama</Text>
+                      <Text style={Styles.listItemText}>Tanggal Terlama</Text>
                     </Left>
                   </ListItem>
                 </View>
@@ -257,7 +286,7 @@ class HistoryScreen extends React.Component {
           {/* history */}
           {noLoading ? (
             <FlatList
-              style={styles.flatList}
+              style={Styles.flatList}
               onRefresh={() => this.refreshData()}
               refreshing={this.state.isFetching}
               showsVerticalScrollIndicator={false}
@@ -266,7 +295,7 @@ class HistoryScreen extends React.Component {
               keyExtractor={item => item.id.toString()}
             />
           ) : (
-            <View style={styles.container}>
+            <View style={Styles.container}>
               <ActivityIndicator size="large" color="#ff6246" />
             </View>
           )}
@@ -276,7 +305,7 @@ class HistoryScreen extends React.Component {
   }
 }
 
-const styles = StyleSheet.create({
+const Styles = StyleSheet.create({
   full: {flex: 1},
   container: {
     flex: 1,
