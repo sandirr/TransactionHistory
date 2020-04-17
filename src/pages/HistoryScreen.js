@@ -68,6 +68,20 @@ class HistoryScreen extends React.Component {
     return nameResult;
   };
 
+  generateAmount = amount => {
+    const newAmountFormat = amount
+      .toString()
+      .split('')
+      .reverse()
+      .join('')
+      .match(/\d{1,3}/g)
+      .join('.')
+      .split('')
+      .reverse()
+      .join('');
+    return newAmountFormat;
+  };
+
   renderRow = ({item}) => {
     return (
       <View
@@ -118,7 +132,9 @@ class HistoryScreen extends React.Component {
                 flexDirection: 'row',
                 alignItems: 'center',
               }}>
-              <Text style={styles.amount}>Rp. 10.000 </Text>
+              <Text style={styles.amount}>
+                Rp{this.generateAmount(item.amount)}{' '}
+              </Text>
               <Icon name="lens" style={{fontSize: 7}} />
               <Text style={styles.date}> 8 April 2020</Text>
             </View>
@@ -147,7 +163,7 @@ class HistoryScreen extends React.Component {
         <StatusBar
           barStyle="dark-content"
           backgroundColor={
-            this.state.modalShown ? 'rgba(rgba(0,0,0,.5))' : '#f4faf8'
+            this.state.modalShown ? 'rgba(rgba(0,0,0,.5))' : '#edf4f0'
           }
         />
         {noLoading ? (
@@ -301,11 +317,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f4faf8',
+    backgroundColor: '#edf4f0',
   },
   contentContainer: {
     flex: 1,
-    backgroundColor: '#f4faf8',
+    backgroundColor: '#edf4f0',
   },
   success: {
     backgroundColor: '#5ab483',
@@ -317,7 +333,7 @@ const styles = StyleSheet.create({
   },
   pending: {
     borderColor: '#ff6246',
-    borderWidth: 1,
+    borderWidth: 2,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
