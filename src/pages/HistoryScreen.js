@@ -39,6 +39,7 @@ class HistoryScreen extends React.Component {
       data: [],
       search: '',
       modalShown: false,
+      isFetching: false,
     };
   }
   componentDidMount() {
@@ -55,6 +56,12 @@ class HistoryScreen extends React.Component {
       });
     }
   }
+
+  refreshData = () => {
+    this.setState({isFetching: true});
+    this.props.dispatch(getHistory());
+    this.setState({isFetching: false});
+  };
 
   getHistory() {
     this.props.dispatch(getHistory());
@@ -136,7 +143,7 @@ class HistoryScreen extends React.Component {
                 Rp{this.generateAmount(item.amount)}{' '}
               </Text>
               <Icon name="lens" style={{fontSize: 7}} />
-              <Text style={styles.date}> 8 April 2020</Text>
+              <Text style={styles.date}> {item.created_at}</Text>
             </View>
           </View>
           <View
@@ -166,147 +173,146 @@ class HistoryScreen extends React.Component {
             this.state.modalShown ? 'rgba(rgba(0,0,0,.5))' : '#edf4f0'
           }
         />
-        {noLoading ? (
-          <View style={styles.contentContainer}>
-            {/* search */}
-            <View style={{marginHorizontal: 7, marginTop: 7, marginBottom: 5}}>
-              <Item
-                style={{
-                  backgroundColor: '#fff',
-                  borderColor: '#fff',
-                  borderRadius: 8,
-                }}>
-                <Icon
-                  name="search"
-                  style={{color: '#ccc', marginLeft: 3, fontSize: 28}}
-                />
-                <Input
-                  placeholder="Cari nama, bank, atau nominal"
-                  style={{letterSpacing: 0, fontSize: 14, paddingLeft: 5}}
-                />
-                <TouchableOpacity
-                  onPress={() =>
-                    this.setState({
-                      modalShown: true,
-                    })
-                  }>
-                  <View style={{flexDirection: 'row', paddingRight: 2}}>
-                    <Text style={{fontSize: 14, color: '#ff6246'}}>
-                      URUTKAN
-                    </Text>
-                    <Image
-                      source={require('../icons/keyboard_arrow_down.png')}
-                      style={{width: 45, height: 18}}
-                    />
-                  </View>
-                </TouchableOpacity>
-              </Item>
-            </View>
-
-            {/* modal */}
-            <Modal
-              visible={this.state.modalShown}
-              transparent={true}
-              // onRequestClose={() => {
-              //   Alert.alert('Modal has been closed.');
-              // }}
-            >
+        <View style={styles.contentContainer}>
+          {/* search */}
+          <View style={{marginHorizontal: 7, marginTop: 7, marginBottom: 5}}>
+            <Item
+              style={{
+                backgroundColor: '#fff',
+                borderColor: '#fff',
+                borderRadius: 8,
+              }}>
+              <Icon
+                name="search"
+                style={{color: '#ccc', marginLeft: 3, fontSize: 28}}
+              />
+              <Input
+                placeholder="Cari nama, bank, atau nominal"
+                style={{letterSpacing: 0, fontSize: 14, paddingLeft: 5}}
+              />
               <TouchableOpacity
-                style={{flex: 1}}
-                onPress={() => this.setState({modalShown: false})}>
-                <View
-                  style={{
-                    backgroundColor: 'rgba(0,0,0,.5)',
-                    flex: 1,
-                    justifyContent: 'center',
-                  }}>
-                  <View
-                    style={{
-                      backgroundColor: '#fff',
-                      marginHorizontal: 20,
-                      borderRadius: 5,
-                      paddingBottom: 15,
-                    }}>
-                    <ListItem style={{marginTop: 15, borderColor: '#fff'}}>
-                      <Left>
-                        <Radio
-                          selected={false}
-                          color="#ff6246"
-                          selectedColor={'#ff6246'}
-                        />
-                        <Text style={{marginLeft: 10, fontSize: 16}}>
-                          URUTKAN
-                        </Text>
-                      </Left>
-                    </ListItem>
-                    <ListItem style={{marginTop: 15, borderColor: '#fff'}}>
-                      <Left>
-                        <Radio
-                          selected={false}
-                          color="#ff6246"
-                          selectedColor={'#ff6246'}
-                        />
-                        <Text style={{marginLeft: 10, fontSize: 16}}>
-                          Nama A-Z
-                        </Text>
-                      </Left>
-                    </ListItem>
-                    <ListItem style={{marginTop: 15, borderColor: '#fff'}}>
-                      <Left>
-                        <Radio
-                          selected={true}
-                          color="#ff6246"
-                          selectedColor={'#ff6246'}
-                        />
-                        <Text style={{marginLeft: 10, fontSize: 16}}>
-                          Nama Z-A
-                        </Text>
-                      </Left>
-                    </ListItem>
-                    <ListItem style={{marginTop: 15, borderColor: '#fff'}}>
-                      <Left>
-                        <Radio
-                          selected={false}
-                          color="#ff6246"
-                          selectedColor={'#ff6246'}
-                        />
-                        <Text style={{marginLeft: 10, fontSize: 16}}>
-                          Tanggal Terbaru
-                        </Text>
-                      </Left>
-                    </ListItem>
-                    <ListItem style={{marginTop: 15, borderColor: '#fff'}}>
-                      <Left>
-                        <Radio
-                          selected={false}
-                          color="#ff6246"
-                          selectedColor={'#ff6246'}
-                        />
-                        <Text style={{marginLeft: 10, fontSize: 16}}>
-                          Tanggal Terlama
-                        </Text>
-                      </Left>
-                    </ListItem>
-                  </View>
+                onPress={() =>
+                  this.setState({
+                    modalShown: true,
+                  })
+                }>
+                <View style={{flexDirection: 'row', paddingRight: 2}}>
+                  <Text style={{fontSize: 14, color: '#ff6246'}}>URUTKAN</Text>
+                  <Image
+                    source={require('../icons/keyboard_arrow_down.png')}
+                    style={{width: 45, height: 18}}
+                  />
                 </View>
               </TouchableOpacity>
-            </Modal>
+            </Item>
+          </View>
 
-            {/* history */}
-            <ScrollView showsVerticalScrollIndicator={false}>
-              <FlatList
-                style={{paddingBottom: 10, paddingTop: 5}}
-                data={this.state.data}
-                renderItem={this.renderRow}
-                keyExtractor={item => item.id.toString()}
-              />
-            </ScrollView>
-          </View>
-        ) : (
-          <View style={styles.container}>
-            <ActivityIndicator size="large" color="#ff6246" />
-          </View>
-        )}
+          {/* modal */}
+          <Modal
+            visible={this.state.modalShown}
+            transparent={true}
+            // onRequestClose={() => {
+            //   Alert.alert('Modal has been closed.');
+            // }}
+          >
+            <TouchableOpacity
+              style={{flex: 1}}
+              onPress={() => this.setState({modalShown: false})}>
+              <View
+                style={{
+                  backgroundColor: 'rgba(0,0,0,.5)',
+                  flex: 1,
+                  justifyContent: 'center',
+                }}>
+                <View
+                  style={{
+                    backgroundColor: '#fff',
+                    marginHorizontal: 20,
+                    borderRadius: 5,
+                    paddingBottom: 15,
+                  }}>
+                  <ListItem style={{marginTop: 15, borderColor: '#fff'}}>
+                    <Left>
+                      <Radio
+                        selected={false}
+                        color="#ff6246"
+                        selectedColor={'#ff6246'}
+                      />
+                      <Text style={{marginLeft: 10, fontSize: 16}}>
+                        URUTKAN
+                      </Text>
+                    </Left>
+                  </ListItem>
+                  <ListItem style={{marginTop: 15, borderColor: '#fff'}}>
+                    <Left>
+                      <Radio
+                        selected={false}
+                        color="#ff6246"
+                        selectedColor={'#ff6246'}
+                      />
+                      <Text style={{marginLeft: 10, fontSize: 16}}>
+                        Nama A-Z
+                      </Text>
+                    </Left>
+                  </ListItem>
+                  <ListItem style={{marginTop: 15, borderColor: '#fff'}}>
+                    <Left>
+                      <Radio
+                        selected={true}
+                        color="#ff6246"
+                        selectedColor={'#ff6246'}
+                      />
+                      <Text style={{marginLeft: 10, fontSize: 16}}>
+                        Nama Z-A
+                      </Text>
+                    </Left>
+                  </ListItem>
+                  <ListItem style={{marginTop: 15, borderColor: '#fff'}}>
+                    <Left>
+                      <Radio
+                        selected={false}
+                        color="#ff6246"
+                        selectedColor={'#ff6246'}
+                      />
+                      <Text style={{marginLeft: 10, fontSize: 16}}>
+                        Tanggal Terbaru
+                      </Text>
+                    </Left>
+                  </ListItem>
+                  <ListItem style={{marginTop: 15, borderColor: '#fff'}}>
+                    <Left>
+                      <Radio
+                        selected={false}
+                        color="#ff6246"
+                        selectedColor={'#ff6246'}
+                      />
+                      <Text style={{marginLeft: 10, fontSize: 16}}>
+                        Tanggal Terlama
+                      </Text>
+                    </Left>
+                  </ListItem>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </Modal>
+
+          {/* history */}
+          {noLoading ? (
+            <FlatList
+              style={{paddingVertical: 5}}
+              onRefresh={() => this.refreshData()}
+              refreshing={this.state.isFetching}
+              showsVerticalScrollIndicator={false}
+              data={this.state.data}
+              renderItem={this.renderRow}
+              keyExtractor={item => item.id.toString()}
+            />
+          ) : (
+            <View style={styles.container}>
+              <ActivityIndicator size="large" color="#ff6246" />
+            </View>
+          )}
+        </View>
       </>
     );
   }
