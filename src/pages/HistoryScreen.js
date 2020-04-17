@@ -1,3 +1,4 @@
+/* eslint-disable radix */
 import React from 'react';
 import {
   View,
@@ -5,28 +6,14 @@ import {
   ActivityIndicator,
   StyleSheet,
   FlatList,
-  Picker,
-  TextInput,
-  Keyboard,
   StatusBar,
   Image,
   Modal,
-  Alert,
   TouchableOpacity,
-  ScrollView,
 } from 'react-native';
 import {getHistory} from '../redux/action/history';
 import {connect} from 'react-redux';
-import {
-  Item,
-  Input,
-  ListItem,
-  List,
-  Right,
-  Left,
-  Radio,
-  Body,
-} from 'native-base';
+import {Item, Input, ListItem, Left, Radio} from 'native-base';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 class HistoryScreen extends React.Component {
@@ -112,37 +99,17 @@ class HistoryScreen extends React.Component {
 
   renderRow = ({item}) => {
     return (
-      <View
-        style={{
-          backgroundColor: '#fff',
-          marginHorizontal: 7,
-          marginBottom: 7,
-          flexDirection: 'row',
-          borderRadius: 5,
-          overflow: 'hidden',
-        }}>
+      <View style={styles.card}>
         <View
-          style={{
-            backgroundColor: item.status === 'SUCCESS' ? '#5ab483' : '#ff6246',
-            width: 5,
-          }}
+          style={
+            item.status === 'SUCCESS'
+              ? styles.successIndicator
+              : styles.pendingIndicator
+          }
         />
-        <View
-          style={{
-            flex: 1,
-            paddingVertical: 15,
-            paddingLeft: 20,
-            paddingRight: 10,
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}>
+        <View style={styles.cardContent}>
           <View>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}>
+            <View style={styles.transfer}>
               <Text style={styles.bankText}>
                 {this.capitalizecheck(item.sender_bank)}{' '}
               </Text>
@@ -155,15 +122,11 @@ class HistoryScreen extends React.Component {
             <Text style={styles.beneficiery}>
               {item.beneficiary_name.toUpperCase()}
             </Text>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-              }}>
+            <View style={styles.transfer}>
               <Text style={styles.amount}>
                 Rp{this.generateAmount(item.amount)}{' '}
               </Text>
-              <Icon name="lens" style={{fontSize: 7}} />
+              <Icon name="lens" style={styles.dot} />
               <Text style={styles.date}>
                 {' '}
                 {this.generateDate(item.created_at.substr(0, 10))}
@@ -199,20 +162,12 @@ class HistoryScreen extends React.Component {
         />
         <View style={styles.contentContainer}>
           {/* search */}
-          <View style={{marginHorizontal: 7, marginTop: 7, marginBottom: 5}}>
-            <Item
-              style={{
-                backgroundColor: '#fff',
-                borderColor: '#fff',
-                borderRadius: 8,
-              }}>
-              <Icon
-                name="search"
-                style={{color: '#ccc', marginLeft: 3, fontSize: 28}}
-              />
+          <View style={styles.search}>
+            <Item style={styles.searchItem}>
+              <Icon name="search" style={styles.searchIcon} />
               <Input
                 placeholder="Cari nama, bank, atau nominal"
-                style={{letterSpacing: 0, fontSize: 14, paddingLeft: 5}}
+                style={styles.searchInput}
               />
               <TouchableOpacity
                 onPress={() =>
@@ -220,11 +175,11 @@ class HistoryScreen extends React.Component {
                     modalShown: true,
                   })
                 }>
-                <View style={{flexDirection: 'row', paddingRight: 2}}>
-                  <Text style={{fontSize: 14, color: '#ff6246'}}>URUTKAN</Text>
+                <View style={styles.sort}>
+                  <Text style={styles.sortText}>URUTKAN</Text>
                   <Image
                     source={require('../icons/keyboard_arrow_down.png')}
-                    style={{width: 45, height: 18}}
+                    style={styles.sortIcon}
                   />
                 </View>
               </TouchableOpacity>
@@ -240,79 +195,58 @@ class HistoryScreen extends React.Component {
             // }}
           >
             <TouchableOpacity
-              style={{flex: 1}}
+              style={styles.full}
               onPress={() => this.setState({modalShown: false})}>
-              <View
-                style={{
-                  backgroundColor: 'rgba(0,0,0,.5)',
-                  flex: 1,
-                  justifyContent: 'center',
-                }}>
-                <View
-                  style={{
-                    backgroundColor: '#fff',
-                    marginHorizontal: 20,
-                    borderRadius: 5,
-                    paddingBottom: 15,
-                  }}>
-                  <ListItem style={{marginTop: 15, borderColor: '#fff'}}>
+              <View style={styles.modalOverlay}>
+                <View style={styles.modalContent}>
+                  <ListItem style={styles.listItem}>
                     <Left>
                       <Radio
                         selected={false}
                         color="#ff6246"
                         selectedColor={'#ff6246'}
                       />
-                      <Text style={{marginLeft: 10, fontSize: 16}}>
-                        URUTKAN
-                      </Text>
+                      <Text style={styles.listItemText}>URUTKAN</Text>
                     </Left>
                   </ListItem>
-                  <ListItem style={{marginTop: 15, borderColor: '#fff'}}>
+                  <ListItem style={styles.listItem}>
                     <Left>
                       <Radio
                         selected={false}
                         color="#ff6246"
                         selectedColor={'#ff6246'}
                       />
-                      <Text style={{marginLeft: 10, fontSize: 16}}>
-                        Nama A-Z
-                      </Text>
+                      <Text style={styles.listItemText}>Nama A-Z</Text>
                     </Left>
                   </ListItem>
-                  <ListItem style={{marginTop: 15, borderColor: '#fff'}}>
+                  <ListItem style={styles.listItem}>
                     <Left>
                       <Radio
                         selected={true}
                         color="#ff6246"
                         selectedColor={'#ff6246'}
                       />
-                      <Text style={{marginLeft: 10, fontSize: 16}}>
-                        Nama Z-A
-                      </Text>
+                      <Text style={styles.listItemText}>Nama Z-A</Text>
                     </Left>
                   </ListItem>
-                  <ListItem style={{marginTop: 15, borderColor: '#fff'}}>
+                  <ListItem style={styles.listItem}>
                     <Left>
                       <Radio
                         selected={false}
                         color="#ff6246"
                         selectedColor={'#ff6246'}
                       />
-                      <Text style={{marginLeft: 10, fontSize: 16}}>
-                        Tanggal Terbaru
-                      </Text>
+                      <Text style={styles.listItemText}>Tanggal Terbaru</Text>
                     </Left>
                   </ListItem>
-                  <ListItem style={{marginTop: 15, borderColor: '#fff'}}>
+                  <ListItem style={styles.listItem}>
                     <Left>
                       <Radio
                         selected={false}
                         color="#ff6246"
                         selectedColor={'#ff6246'}
                       />
-                      <Text style={{marginLeft: 10, fontSize: 16}}>
-                        Tanggal Terlama
-                      </Text>
+                      <Text style={styles.listItemText}>Tanggal Terlama</Text>
                     </Left>
                   </ListItem>
                 </View>
@@ -323,7 +257,7 @@ class HistoryScreen extends React.Component {
           {/* history */}
           {noLoading ? (
             <FlatList
-              style={{paddingVertical: 5}}
+              style={styles.flatList}
               onRefresh={() => this.refreshData()}
               refreshing={this.state.isFetching}
               showsVerticalScrollIndicator={false}
@@ -343,6 +277,7 @@ class HistoryScreen extends React.Component {
 }
 
 const styles = StyleSheet.create({
+  full: {flex: 1},
   container: {
     flex: 1,
     justifyContent: 'center',
@@ -353,6 +288,57 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#edf4f0',
   },
+  card: {
+    backgroundColor: '#fff',
+    marginHorizontal: 7,
+    marginBottom: 7,
+    flexDirection: 'row',
+    borderRadius: 5,
+    overflow: 'hidden',
+  },
+  cardContent: {
+    flex: 1,
+    paddingVertical: 15,
+    paddingLeft: 20,
+    paddingRight: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  transfer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  search: {marginHorizontal: 7, marginTop: 7, marginBottom: 5},
+  searchItem: {
+    backgroundColor: '#fff',
+    borderColor: '#fff',
+    borderRadius: 8,
+  },
+  searchIcon: {color: '#ccc', marginLeft: 3, fontSize: 28},
+  searchInput: {letterSpacing: 0, fontSize: 14, paddingLeft: 5},
+  sort: {flexDirection: 'row', paddingRight: 2},
+  sortText: {
+    fontSize: 14,
+    color: '#ff6246',
+    marginRight: -5,
+    fontWeight: 'bold',
+  },
+  sortIcon: {width: 45, height: 18},
+  modalOverlay: {
+    backgroundColor: 'rgba(0,0,0,.5)',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    marginHorizontal: 20,
+    borderRadius: 5,
+    paddingBottom: 15,
+  },
+  listItem: {marginTop: 15, borderColor: '#fff'},
+  listItemText: {marginLeft: 10, fontSize: 16},
+  flatList: {paddingVertical: 5},
   success: {
     backgroundColor: '#5ab483',
     paddingHorizontal: 8,
@@ -390,6 +376,9 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 16,
   },
+  dot: {fontSize: 7},
+  successIndicator: {backgroundColor: '#5ab483', width: 5},
+  pendingIndicator: {backgroundColor: '#ff6246', width: 5},
 });
 
 const mapHistory = state => {
