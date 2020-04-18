@@ -6,7 +6,7 @@ const Styles = StyleSheet.create({
   },
   cardDetail: {
     backgroundColor: 'white',
-    marginTop: 30,
+    marginTop: 50,
   },
   idtrx: {
     borderBottomWidth: 1,
@@ -18,7 +18,12 @@ const Styles = StyleSheet.create({
     paddingHorizontal: 25,
     paddingVertical: 20,
   },
-  trxContent: {marginHorizontal: 25, paddingVertical: 20},
+  trxContent: {
+    marginHorizontal: 25,
+    paddingVertical: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   viewText: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -56,6 +61,12 @@ const Styles = StyleSheet.create({
   backText: {
     color: '#ff6246',
     fontSize: 17,
+  },
+  copy: {flex: 1},
+  copyIcon: {
+    width: 17,
+    height: 20.5,
+    marginLeft: 7,
   },
 });
 

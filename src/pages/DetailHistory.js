@@ -1,5 +1,12 @@
-import React, {useState} from 'react';
-import {View, Text, TouchableOpacity} from 'react-native';
+import React from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  Clipboard,
+  ToastAndroid,
+} from 'react-native';
 import Styles from '../stylesheet/DetailHistory';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import DateGenerator from '../generator/DateGenerator';
@@ -18,12 +25,26 @@ const DetailHistory = props => {
     remark,
     account_number,
   } = props.navigation.getParam('data');
+  const copyId = () => {
+    Clipboard.setString(id);
+    ToastAndroid.show(
+      'ID COPIED TO CLIPBOARD',
+      ToastAndroid.LONG,
+      ToastAndroid.TOP,
+    );
+  };
   return (
     <View style={Styles.container}>
       <View style={Styles.cardDetail}>
         <View style={Styles.idtrx}>
           <View style={Styles.trxContent}>
             <Text style={Styles.headerText}>ID TRANSAKSI: #{id}</Text>
+            <TouchableOpacity style={Styles.copy} onPress={copyId}>
+              <Image
+                source={require('../icons/copy.png')}
+                style={Styles.copyIcon}
+              />
+            </TouchableOpacity>
           </View>
         </View>
         <View>
