@@ -62,7 +62,7 @@ const Styles = StyleSheet.create({
     color: '#ff6246',
     fontSize: 17,
   },
-  copy: {flex: 1},
+  copy: {width: 45},
   copyIcon: {
     width: 17,
     height: 20.5,

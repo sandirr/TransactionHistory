@@ -175,7 +175,6 @@ class HistoryScreen extends React.Component {
 
   render() {
     const {noLoading} = this.props.histories;
-    console.log('notfiltered', this.state.notFilteredData);
     return (
       <>
         <StatusBar
@@ -185,7 +184,6 @@ class HistoryScreen extends React.Component {
           }
         />
         <View style={Styles.contentContainer}>
-          {/* search */}
           <View style={Styles.search}>
             <Item style={Styles.searchItem}>
               <Icon name="search" style={Styles.searchIcon} />
@@ -212,7 +210,6 @@ class HistoryScreen extends React.Component {
             </Item>
           </View>
 
-          {/* modal */}
           <Modal visible={this.state.modalShown} transparent={true}>
             <TouchableOpacity
               style={Styles.full}
@@ -242,7 +239,6 @@ class HistoryScreen extends React.Component {
             </TouchableOpacity>
           </Modal>
 
-          {/* history */}
           {noLoading ? (
             <FlatList
               style={Styles.flatList}
