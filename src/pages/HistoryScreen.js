@@ -28,6 +28,14 @@ class HistoryScreen extends React.Component {
       search: '',
       modalShown: false,
       isFetching: false,
+      sortBy: [
+        'URUTKAN',
+        'Nama A-Z',
+        'Nama Z-A',
+        'Tanggal Terbaru',
+        'Tanggal Terlama',
+      ],
+      activeSort: 'URUTKAN',
     };
   }
   componentDidMount() {
@@ -124,6 +132,29 @@ class HistoryScreen extends React.Component {
     }
   };
 
+  sorting = sortType => {
+    let result = this.state.notFilteredData.sort((a, b) => {
+      if (sortType === 'Nama A-Z') {
+        return (
+          a.beneficiary_name.toLowerCase() > b.beneficiary_name.toLowerCase()
+        );
+      } else if (sortType === 'Nama Z-A') {
+        return (
+          b.beneficiary_name.toLowerCase() > a.beneficiary_name.toLowerCase()
+        );
+      } else if (sortType === 'Tanggal Terlama') {
+        let beta = new Date(b.retiredate),
+          alpha = new Date(a.retiredate);
+        return beta - alpha;
+      } else if (sortType === 'Tanggal Terbaru') {
+        return a.created_at - b.created_at;
+      } else {
+        return this.state.notFilteredData;
+      }
+    });
+    this.setState({data: result, activeSort: sortType, modalShown: false});
+  };
+
   renderRow = ({item}) => {
     return (
       <View style={Styles.card}>
@@ -216,68 +247,30 @@ class HistoryScreen extends React.Component {
           </View>
 
           {/* modal */}
-          <Modal
-            visible={this.state.modalShown}
-            transparent={true}
-            // onRequestClose={() => {
-            //   Alert.alert('Modal has been closed.');
-            // }}
-          >
+          <Modal visible={this.state.modalShown} transparent={true}>
             <TouchableOpacity
               style={Styles.full}
               onPress={() => this.setState({modalShown: false})}>
               <View style={Styles.modalOverlay}>
                 <View style={Styles.modalContent}>
-                  <ListItem style={Styles.listItem}>
-                    <Left>
-                      <Radio
-                        selected={false}
-                        color="#ff6246"
-                        selectedColor={'#ff6246'}
-                      />
-                      <Text style={Styles.listItemText}>URUTKAN</Text>
-                    </Left>
-                  </ListItem>
-                  <ListItem style={Styles.listItem}>
-                    <Left>
-                      <Radio
-                        selected={false}
-                        color="#ff6246"
-                        selectedColor={'#ff6246'}
-                      />
-                      <Text style={Styles.listItemText}>Nama A-Z</Text>
-                    </Left>
-                  </ListItem>
-                  <ListItem style={Styles.listItem}>
-                    <Left>
-                      <Radio
-                        selected={true}
-                        color="#ff6246"
-                        selectedColor={'#ff6246'}
-                      />
-                      <Text style={Styles.listItemText}>Nama Z-A</Text>
-                    </Left>
-                  </ListItem>
-                  <ListItem style={Styles.listItem}>
-                    <Left>
-                      <Radio
-                        selected={false}
-                        color="#ff6246"
-                        selectedColor={'#ff6246'}
-                      />
-                      <Text style={Styles.listItemText}>Tanggal Terbaru</Text>
-                    </Left>
-                  </ListItem>
-                  <ListItem style={Styles.listItem}>
-                    <Left>
-                      <Radio
-                        selected={false}
-                        color="#ff6246"
-                        selectedColor={'#ff6246'}
-                      />
-                      <Text style={Styles.listItemText}>Tanggal Terlama</Text>
-                    </Left>
-                  </ListItem>
+                  {this.state.sortBy.map((sortType, index) => (
+                    <ListItem
+                      style={Styles.listItem}
+                      key={index}
+                      onPress={() => this.sorting(sortType)}>
+                      <Left>
+                        <Radio
+                          onPress={() => this.sorting(sortType)}
+                          selected={
+                            sortType === this.state.activeSort ? true : false
+                          }
+                          color="#ff6246"
+                          selectedColor={'#ff6246'}
+                        />
+                        <Text style={Styles.listItemText}>{sortType}</Text>
+                      </Left>
+                    </ListItem>
+                  ))}
                 </View>
               </View>
             </TouchableOpacity>
@@ -361,9 +354,10 @@ const Styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: '#fff',
-    marginHorizontal: 20,
+    marginHorizontal: 25,
     borderRadius: 5,
-    paddingBottom: 15,
+    paddingTop: 20,
+    paddingBottom: 35,
   },
   listItem: {marginTop: 15, borderColor: '#fff'},
   listItemText: {marginLeft: 10, fontSize: 16},
