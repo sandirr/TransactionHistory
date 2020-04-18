@@ -143,11 +143,9 @@ class HistoryScreen extends React.Component {
           b.beneficiary_name.toLowerCase() > a.beneficiary_name.toLowerCase()
         );
       } else if (sortType === 'Tanggal Terlama') {
-        let beta = new Date(b.retiredate),
-          alpha = new Date(a.retiredate);
-        return beta - alpha;
+        return b.created_at < a.created_at;
       } else if (sortType === 'Tanggal Terbaru') {
-        return a.created_at - b.created_at;
+        return a.created_at < b.created_at;
       } else {
         return this.state.notFilteredData;
       }
