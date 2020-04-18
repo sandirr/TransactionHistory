@@ -1,10 +1,8 @@
-/* eslint-disable radix */
 import React from 'react';
 import {
   View,
   Text,
   ActivityIndicator,
-  StyleSheet,
   FlatList,
   StatusBar,
   Image,
@@ -15,11 +13,12 @@ import {getHistory} from '../redux/action/history';
 import {connect} from 'react-redux';
 import {Item, Input, ListItem, Left, Radio} from 'native-base';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import DateGenerator from '../generator/DateGenerator';
+import NumberGenerator from '../generator/NumberGenerator';
+import CapitalizeCheck from '../generator/CapitalizeCheck';
+import Styles from '../stylesheet/HistoryStyle';
 
 class HistoryScreen extends React.Component {
-  static navigationOptions = {
-    headerShown: false,
-  };
   constructor(props) {
     super(props);
     this.state = {
@@ -66,48 +65,6 @@ class HistoryScreen extends React.Component {
     this.props.dispatch(getHistory());
   }
 
-  capitalizecheck = bankName => {
-    let nameResult = '';
-    bankName.length > 4
-      ? (nameResult = bankName[0].toUpperCase() + bankName.slice(1))
-      : (nameResult = bankName.toUpperCase());
-    return nameResult;
-  };
-
-  generateAmount = amount => {
-    const newAmountFormat = amount
-      .toString()
-      .split('')
-      .reverse()
-      .join('')
-      .match(/\d{1,3}/g)
-      .join('.')
-      .split('')
-      .reverse()
-      .join('');
-    return newAmountFormat;
-  };
-
-  generateDate = date => {
-    const [y, m, d] = date.split('-');
-    const month = [
-      'Januari',
-      'Februari',
-      'Maret',
-      'April',
-      'Mei',
-      'Juni',
-      'Juli',
-      'Agustus',
-      'September',
-      'Oktober',
-      'November',
-      'Desember',
-    ];
-    const generatedDate = `${d} ${month[parseInt(m) - 1]} ${y}`;
-    return generatedDate;
-  };
-
   searchHistory = text => {
     let newData = this.state.notFilteredData.filter(preData => {
       let name = preData.beneficiary_name
@@ -126,9 +83,9 @@ class HistoryScreen extends React.Component {
       return name + amount + beneficiary_bank + sender_bank;
     });
     if (text !== '') {
-      this.setState({data: newData});
+      this.setState({data: newData, search: text});
     } else {
-      this.setState({data: this.state.notFilteredData});
+      this.setState({data: this.state.notFilteredData, search: text});
     }
   };
 
@@ -147,67 +104,77 @@ class HistoryScreen extends React.Component {
       } else if (sortType === 'Tanggal Terbaru') {
         return a.created_at < b.created_at;
       } else {
-        return this.state.notFilteredData;
+        return a.created_at < b.created_at;
       }
     });
-    this.setState({data: result, activeSort: sortType, modalShown: false});
+    this.setState({
+      data: result,
+      activeSort: sortType,
+      modalShown: false,
+      search: '',
+    });
   };
 
   renderRow = ({item}) => {
     return (
-      <View style={Styles.card}>
-        <View
-          style={
-            item.status === 'SUCCESS'
-              ? Styles.successIndicator
-              : Styles.pendingIndicator
-          }
-        />
-        <View style={Styles.cardContent}>
-          <View>
-            <View style={Styles.transfer}>
-              <Text style={Styles.bankText}>
-                {this.capitalizecheck(item.sender_bank)}{' '}
-              </Text>
-              <Icon name="arrow-forward" style={Styles.bankText} />
-              <Text style={Styles.bankText}>
-                {' '}
-                {this.capitalizecheck(item.beneficiary_bank)}
-              </Text>
-            </View>
-            <Text style={Styles.beneficiery}>
-              {item.beneficiary_name.toUpperCase()}
-            </Text>
-            <View style={Styles.transfer}>
-              <Text style={Styles.amount}>
-                Rp{this.generateAmount(item.amount)}{' '}
-              </Text>
-              <Icon name="lens" style={Styles.dot} />
-              <Text style={Styles.date}>
-                {' '}
-                {this.generateDate(item.created_at.substr(0, 10))}
-              </Text>
-            </View>
-          </View>
+      <TouchableOpacity
+        onPress={() => this.props.navigation.navigate('Detail', {data: item})}>
+        <View style={Styles.card}>
           <View
-            style={item.status === 'SUCCESS' ? Styles.success : Styles.pending}>
-            <Text
+            style={
+              item.status === 'SUCCESS'
+                ? Styles.successIndicator
+                : Styles.pendingIndicator
+            }
+          />
+          <View style={Styles.cardContent}>
+            <View>
+              <View style={Styles.transfer}>
+                <Text style={Styles.bankText}>
+                  <CapitalizeCheck bankName={item.sender_bank} />{' '}
+                </Text>
+                <Icon name="arrow-forward" style={Styles.bankText} />
+                <Text style={Styles.bankText}>
+                  {' '}
+                  <CapitalizeCheck bankName={item.beneficiary_bank} />
+                </Text>
+              </View>
+              <Text style={Styles.beneficiery}>
+                {item.beneficiary_name.toUpperCase()}
+              </Text>
+              <View style={Styles.transfer}>
+                <Text style={Styles.amount}>
+                  Rp
+                  <NumberGenerator data={item.amount} />{' '}
+                </Text>
+                <Icon name="lens" style={Styles.dot} />
+                <Text style={Styles.date}>
+                  {' '}
+                  <DateGenerator data={item.created_at.substr(0, 10)} />
+                </Text>
+              </View>
+            </View>
+            <View
               style={
-                item.status === 'SUCCESS'
-                  ? Styles.successText
-                  : Styles.pendingText
+                item.status === 'SUCCESS' ? Styles.success : Styles.pending
               }>
-              {item.status === 'SUCCESS' ? 'Berhasil' : 'Pengecekan'}
-            </Text>
+              <Text
+                style={
+                  item.status === 'SUCCESS'
+                    ? Styles.successText
+                    : Styles.pendingText
+                }>
+                {item.status === 'SUCCESS' ? 'Berhasil' : 'Pengecekan'}
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
   render() {
     const {noLoading} = this.props.histories;
-    console.log(this.state.data);
     console.log('notfiltered', this.state.notFilteredData);
     return (
       <>
@@ -226,6 +193,7 @@ class HistoryScreen extends React.Component {
                 placeholder="Cari nama, bank, atau nominal"
                 style={Styles.searchInput}
                 onChangeText={text => this.searchHistory(text)}
+                value={this.state.search}
               />
               <TouchableOpacity
                 onPress={() =>
@@ -234,7 +202,7 @@ class HistoryScreen extends React.Component {
                   })
                 }>
                 <View style={Styles.sort}>
-                  <Text style={Styles.sortText}>URUTKAN</Text>
+                  <Text style={Styles.sortText}>{this.state.activeSort}</Text>
                   <Image
                     source={require('../icons/keyboard_arrow_down.png')}
                     style={Styles.sortIcon}
@@ -295,112 +263,6 @@ class HistoryScreen extends React.Component {
     );
   }
 }
-
-const Styles = StyleSheet.create({
-  full: {flex: 1},
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#edf4f0',
-  },
-  contentContainer: {
-    flex: 1,
-    backgroundColor: '#edf4f0',
-  },
-  card: {
-    backgroundColor: '#fff',
-    marginHorizontal: 7,
-    marginBottom: 7,
-    flexDirection: 'row',
-    borderRadius: 5,
-    overflow: 'hidden',
-  },
-  cardContent: {
-    flex: 1,
-    paddingVertical: 15,
-    paddingLeft: 20,
-    paddingRight: 10,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  transfer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  search: {marginHorizontal: 7, marginTop: 7, marginBottom: 5},
-  searchItem: {
-    backgroundColor: '#fff',
-    borderColor: '#fff',
-    borderRadius: 8,
-  },
-  searchIcon: {color: '#ccc', marginLeft: 3, fontSize: 28},
-  searchInput: {letterSpacing: 0, fontSize: 14, paddingLeft: 5},
-  sort: {flexDirection: 'row', paddingRight: 2},
-  sortText: {
-    fontSize: 14,
-    color: '#ff6246',
-    marginRight: -5,
-    fontWeight: 'bold',
-  },
-  sortIcon: {width: 45, height: 18},
-  modalOverlay: {
-    backgroundColor: 'rgba(0,0,0,.5)',
-    flex: 1,
-    justifyContent: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    marginHorizontal: 25,
-    borderRadius: 5,
-    paddingTop: 20,
-    paddingBottom: 35,
-  },
-  listItem: {marginTop: 15, borderColor: '#fff'},
-  listItemText: {marginLeft: 10, fontSize: 16},
-  flatList: {paddingVertical: 5},
-  success: {
-    backgroundColor: '#5ab483',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pending: {
-    borderColor: '#ff6246',
-    borderWidth: 2,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  successText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  pendingText: {
-    fontWeight: 'bold',
-  },
-  bankText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  beneficiery: {
-    fontSize: 18,
-  },
-  amount: {
-    fontSize: 16,
-  },
-  date: {
-    fontSize: 16,
-  },
-  dot: {fontSize: 7},
-  successIndicator: {backgroundColor: '#5ab483', width: 5},
-  pendingIndicator: {backgroundColor: '#ff6246', width: 5},
-});
 
 const mapHistory = state => {
   return {
