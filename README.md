@@ -1,5 +1,27 @@
 # TransactionHistory using React Native
 
+## Start
+
+```
+git clone https://github.com/sandirr/TransactionHistory.git
+cd TransactionHistory
+npm install
+```
+
+## Run APK Debug
+
+**Andorid**
+
+```
+npx react-native run-android
+```
+
+**IOS**
+
+```
+npx react-native run-ios
+```
+
 ## Features
 
 **1. Transaction List Page**
