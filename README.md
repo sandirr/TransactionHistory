@@ -22,6 +22,16 @@ npx react-native run-android
 npx react-native run-ios
 ```
 
+## API URI
+
+```
+https://nextar.flip.id/frontend-test
+```
+
+**API Call using fetch method**
+
+./src/redux/action/history.js
+
 ## Features
 
 **1. Transaction List Page**
